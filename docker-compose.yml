@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sift
+      POSTGRES_PASSWORD: sift
+      POSTGRES_DB: sift
+    ports:
+      - "55432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sift -d sift"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Stands in for MinIO: MinIO's community Docker images are no longer
+  # publicly pullable (the project moved to a licensed "AIStor" distribution
+  # and is now source-only for the OSS edition, see github.com/minio/minio).
+  # S3Mock speaks the same S3 API sift's code already targets via
+  # S3_ENDPOINT / S3_FORCE_PATH_STYLE, so no app code changes are needed.
+  # Swap this for real MinIO/AIStor if you have access to a licensed image.
+  minio:
+    image: adobe/s3mock:latest
+    restart: unless-stopped
+    environment:
+      COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: sift-packages
+    ports:
+      - "9000:9090"
+      - "9001:9191"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/favicon.ico"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pg_data:

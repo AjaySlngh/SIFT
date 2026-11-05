@@ -1,0 +1,23 @@
+type: hardship_letter
+description: >
+  A signed letter from the borrower explaining their financial hardship,
+  written in their own words.
+required_per_packet: 1
+fields:
+  - name: borrower_name
+    type: string
+    prompt: Full name of the borrower as signed or printed in the letter.
+    weight: 2
+  - name: hardship_type
+    type: string
+    prompt: The category of hardship described (e.g. job loss, medical, death in family).
+    weight: 2
+  - name: hardship_start_date
+    type: date
+    prompt: The date the borrower says the hardship began.
+    weight: 1
+  - name: signed
+    type: boolean
+    prompt: Whether the letter is signed by the borrower.
+    weight: 1
+checks: []

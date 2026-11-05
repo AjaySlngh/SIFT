@@ -1,0 +1,36 @@
+{
+  "name": "sift",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Intake pipeline for mortgage borrower assistance packets: split, classify, extract, score, route, review.",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev:web": "pnpm --filter @sift/web dev",
+    "dev:worker": "pnpm --filter @sift/worker dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "db:generate": "pnpm --filter @sift/db generate",
+    "db:migrate": "pnpm --filter @sift/db migrate",
+    "seed": "tsx scripts/seed.ts",
+    "generate:packets": "tsx scripts/generate-packets.ts",
+    "verify:audit": "tsx scripts/verify-audit.ts",
+    "eval": "tsx eval/run.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.3.0",
+    "@sift/core": "workspace:*",
+    "@sift/db": "workspace:*",
+    "drizzle-orm": "^0.38.2",
+    "pdf-lib": "^1.17.1"
+  }
+}

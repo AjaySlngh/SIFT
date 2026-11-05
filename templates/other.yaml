@@ -1,0 +1,8 @@
+type: other
+description: >
+  Fallback type for any document that doesn't match assistance_application,
+  hardship_letter, pay_stub, or bank_statement. Always routes to a
+  reclassify review task.
+required_per_packet: 0
+fields: []
+checks: []

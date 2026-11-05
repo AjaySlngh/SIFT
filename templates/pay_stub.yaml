@@ -1,0 +1,25 @@
+type: pay_stub
+description: >
+  An employee earnings statement for a single pay period.
+  Shows employer, pay dates, gross and net pay, and deductions.
+required_per_packet: 2   # two most recent stubs
+fields:
+  - name: employee_name
+    type: string
+    prompt: Full name of the employee as printed.
+    weight: 2
+  - name: pay_period_end
+    type: date
+    prompt: Last day of the pay period, not the pay date.
+    weight: 1
+  - name: gross_pay
+    type: money
+    prompt: Gross pay for this period only, not year to date.
+    weight: 3
+  - name: net_pay
+    type: money
+    prompt: Net pay for this period only.
+    weight: 2
+checks:
+  - net_pay <= gross_pay
+  - pay_period_end within 60 days of case.created_at

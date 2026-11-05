@@ -1,0 +1,28 @@
+type: assistance_application
+description: >
+  A borrower's loss mitigation / financial hardship assistance application.
+  Shows borrower identity, the loan being modified, property address,
+  household income, and the stated reason for hardship.
+required_per_packet: 1
+fields:
+  - name: borrower_name
+    type: string
+    prompt: Full legal name of the borrower as printed on the application.
+    weight: 2
+  - name: loan_number
+    type: string
+    prompt: The loan or account number being referenced.
+    weight: 3
+  - name: property_address
+    type: string
+    prompt: Street address of the mortgaged property.
+    weight: 2
+  - name: monthly_income
+    type: money
+    prompt: Borrower's total gross monthly household income as stated.
+    weight: 2
+  - name: hardship_reason
+    type: string
+    prompt: The reason given for financial hardship (e.g. job loss, medical, divorce).
+    weight: 1
+checks: []

@@ -1,0 +1,20 @@
+type: bank_statement
+description: >
+  A monthly bank account statement showing the account holder, the
+  statement period, and the ending balance.
+required_per_packet: 2   # two most recent months
+fields:
+  - name: account_holder
+    type: string
+    prompt: Name on the bank account as printed on the statement.
+    weight: 2
+  - name: statement_end_date
+    type: date
+    prompt: The closing date of the statement period.
+    weight: 1
+  - name: ending_balance
+    type: money
+    prompt: The ending balance for this statement period.
+    weight: 3
+checks:
+  - statement_end_date within 60 days of case.created_at
