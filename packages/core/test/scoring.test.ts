@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { scoreField, scoreDocument, routeDocument } from "../src/scoring.js";
-import type { DocumentTemplate } from "../src/templates.js";
+import { scoreField, scoreDocument, routeDocument } from "../src/scoring";
+import type { DocumentTemplate } from "../src/templates";
 
 describe("scoreField", () => {
   it("zeroes out on parse failure", () => {

@@ -1,4 +1,4 @@
-import type { DocumentTemplate, TemplateField } from "./templates.js";
+import type { DocumentTemplate, TemplateField } from "./templates";
 
 export interface ExtractedField {
   name: string;

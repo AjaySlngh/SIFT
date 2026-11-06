@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import type { Database } from "./client.js";
-import { auditEvents } from "./schema.js";
+import type { Database } from "./client";
+import { auditEvents } from "./schema";
 import { desc } from "drizzle-orm";
 
 export interface AppendAuditEventInput {

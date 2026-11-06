@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
 
 export type FieldType = "string" | "date" | "money" | "boolean";
@@ -19,7 +20,8 @@ export interface DocumentTemplate {
   checks: string[];
 }
 
-const TEMPLATES_DIR = join(import.meta.dirname, "../../../templates");
+const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
+const TEMPLATES_DIR = join(MODULE_DIR, "../../../templates");
 
 export function loadTemplate(type: string): DocumentTemplate {
   const raw = readFileSync(join(TEMPLATES_DIR, `${type}.yaml`), "utf8");

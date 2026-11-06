@@ -32,7 +32,11 @@ async function claimNextJob(): Promise<Job | null> {
 }
 
 async function runStage(job: Job): Promise<void> {
-  const ctx = { caseId: job.payload.caseId as string, packageId: job.payload.packageId as string };
+  const ctx = {
+    caseId: job.payload.caseId as string,
+    packageId: job.payload.packageId as string,
+    documentId: job.payload.documentId as string | undefined,
+  };
 
   switch (job.stage) {
     case "split":
