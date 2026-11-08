@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { db, tokenLedger } from "@sift/db";
 
 export type Stage = "split" | "read" | "classify" | "extract" | "score" | "route" | "act";
 
@@ -29,14 +30,17 @@ export interface LlmCallResult {
 }
 
 // Per-model USD rate table, $ per 1M tokens. Keep this in config, tune as pricing changes.
+// Falls back to the haiku-tier rate for any model not listed, so a spend
+// estimate is never silently zero just because a model alias changed.
 const RATE_TABLE: Record<string, { input: number; output: number }> = {
   "claude-haiku-4-5": { input: 1, output: 5 },
   "claude-sonnet-4-5": { input: 3, output: 15 },
+  "claude-sonnet-4-6": { input: 3, output: 15 },
 };
+const DEFAULT_RATE = { input: 1, output: 5 };
 
 function estimateCostUsd(model: string, inputTokens: number, outputTokens: number): number {
-  const rate = RATE_TABLE[model];
-  if (!rate) return 0;
+  const rate = RATE_TABLE[model] ?? DEFAULT_RATE;
   return (inputTokens / 1_000_000) * rate.input + (outputTokens / 1_000_000) * rate.output;
 }
 
@@ -73,8 +77,15 @@ export async function callModel(opts: LlmCallOptions): Promise<LlmCallResult> {
     outputTokens: message.usage.output_tokens,
   };
 
-  // TODO: persist to token_ledger (case_id, stage, model, usage, estimateCostUsd(...))
-  void estimateCostUsd;
+  await db.insert(tokenLedger).values({
+    caseId: opts.caseId,
+    stage: opts.stage,
+    model: opts.caller.model,
+    inputTokens: usage.inputTokens,
+    cachedTokens: usage.cachedTokens,
+    outputTokens: usage.outputTokens,
+    usd: estimateCostUsd(opts.caller.model, usage.inputTokens, usage.outputTokens).toFixed(5),
+  });
 
   return { message, usage };
 }

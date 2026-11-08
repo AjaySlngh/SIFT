@@ -1,5 +1,5 @@
 import { appendAuditEvent, cases, db, users } from "@sift/db";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 interface CreateCaseBody {
@@ -8,6 +8,14 @@ interface CreateCaseBody {
   /** users.id of the reviewer creating the case. No session/auth yet, so the
    * caller must pass it explicitly — every write route requires an actor. */
   actorId: string;
+}
+
+/**
+ * GET /api/cases — list all cases, newest first.
+ */
+export async function GET() {
+  const rows = await db.select().from(cases).orderBy(desc(cases.createdAt));
+  return NextResponse.json(rows);
 }
 
 /**
