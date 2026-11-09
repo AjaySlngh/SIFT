@@ -18,11 +18,25 @@ import * as pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.mjs";
 // statically analyze/transform `require.resolve` calls (e.g. Next.js's
 // Turbopack build-time "collect page data" pass) don't always return a real
 // filesystem path when a module is merely imported, not actually invoked.
-let cachedStandardFontDataUrl: string | undefined;
-function getStandardFontDataUrl(): string {
+// Inside Next's production server bundle, `require.resolve` is rewritten to
+// return an internal module id (a number) instead of a real path, so this is
+// best-effort: fall back to `undefined` rather than throwing. Callers that
+// don't need fonts (just counting pages) should omit this entirely.
+let cachedStandardFontDataUrl: string | undefined | null = null;
+function getStandardFontDataUrl(): string | undefined {
+  if (cachedStandardFontDataUrl !== null) return cachedStandardFontDataUrl;
+  cachedStandardFontDataUrl = process.env.PDFJS_STANDARD_FONTS;
   if (!cachedStandardFontDataUrl) {
-    const require = createRequire(import.meta.url);
-    cachedStandardFontDataUrl = join(dirname(require.resolve("pdfjs-dist/package.json")), "standard_fonts") + "/";
+    try {
+      const require = createRequire(import.meta.url);
+      const pkg: unknown = require.resolve("pdfjs-dist/package.json");
+      // Inside Next's server bundle this comes back as a module id, not a path
+      if (typeof pkg === "string") {
+        cachedStandardFontDataUrl = join(dirname(pkg), "standard_fonts") + "/";
+      }
+    } catch {
+      cachedStandardFontDataUrl = undefined;
+    }
   }
   return cachedStandardFontDataUrl;
 }
@@ -35,7 +49,8 @@ export interface PageText {
 
 /** Returns the number of pages in a PDF without extracting text. */
 export async function getPageCount(bytes: Uint8Array): Promise<number> {
-  const doc = await getDocument({ data: bytes, standardFontDataUrl: getStandardFontDataUrl() }).promise;
+  // No fonts needed just to count pages
+  const doc = await getDocument({ data: bytes }).promise;
   const count = doc.numPages;
   await doc.destroy();
   return count;
