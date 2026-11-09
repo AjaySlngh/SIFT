@@ -45,11 +45,14 @@ export default function LedgerPage() {
   }, [caseId]);
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Ledger</h1>
+    <main className="mx-auto w-full max-w-4xl flex-1 px-8 py-12">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="label-eyebrow">Token spend</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Ledger</h1>
+        </div>
         <select
-          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          className="input font-mono text-xs"
           value={caseId}
           onChange={(e) => setCaseId(e.target.value)}
         >
@@ -63,42 +66,64 @@ export default function LedgerPage() {
       </div>
 
       {!data ? (
-        <p className="mt-2 text-sm text-gray-500">Loading…</p>
+        <p className="mt-6 text-sm" style={{ color: "var(--muted)" }}>
+          Loading…
+        </p>
       ) : data.rows.length === 0 ? (
-        <p className="mt-2 text-sm text-gray-500">No spend data yet.</p>
+        <p className="mt-6 text-sm" style={{ color: "var(--muted)" }}>
+          No spend data yet.
+        </p>
       ) : (
         <>
-          <div className="mt-4 flex gap-6 text-sm">
-            <span>
-              Total: <strong>${data.totalUsd.toFixed(4)}</strong>
-            </span>
-            <span>Input tokens: {data.totalInputTokens.toLocaleString()}</span>
-            <span>Output tokens: {data.totalOutputTokens.toLocaleString()}</span>
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            <div className="card">
+              <p className="label-eyebrow">Total spend</p>
+              <p className="mt-2 font-mono text-xl" style={{ color: "var(--accent-hover)" }}>
+                ${data.totalUsd.toFixed(4)}
+              </p>
+            </div>
+            <div className="card">
+              <p className="label-eyebrow">Input tokens</p>
+              <p className="mt-2 font-mono text-xl">{data.totalInputTokens.toLocaleString()}</p>
+            </div>
+            <div className="card">
+              <p className="label-eyebrow">Output tokens</p>
+              <p className="mt-2 font-mono text-xl">{data.totalOutputTokens.toLocaleString()}</p>
+            </div>
           </div>
-          <table className="mt-4 w-full text-left text-sm">
-            <thead className="text-xs uppercase text-gray-500">
-              <tr>
-                <th className="pb-2">Stage</th>
-                <th className="pb-2">Model</th>
-                <th className="pb-2">Input</th>
-                <th className="pb-2">Output</th>
-                <th className="pb-2">USD</th>
-                <th className="pb-2">When</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.rows.map((r) => (
-                <tr key={r.id} className="border-t border-gray-100">
-                  <td className="py-2">{r.stage}</td>
-                  <td className="py-2">{r.model}</td>
-                  <td className="py-2">{r.inputTokens}</td>
-                  <td className="py-2">{r.outputTokens}</td>
-                  <td className="py-2">${Number(r.usd ?? 0).toFixed(5)}</td>
-                  <td className="py-2 text-gray-500">{new Date(r.at).toLocaleString()}</td>
+
+          <div className="mt-6 overflow-hidden rounded-lg border" style={{ borderColor: "var(--border)" }}>
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="label-eyebrow border-b" style={{ borderColor: "var(--border)" }}>
+                  <th className="px-4 py-2 font-normal">Stage</th>
+                  <th className="px-4 py-2 font-normal">Model</th>
+                  <th className="px-4 py-2 font-normal">Input</th>
+                  <th className="px-4 py-2 font-normal">Output</th>
+                  <th className="px-4 py-2 font-normal">USD</th>
+                  <th className="px-4 py-2 font-normal">When</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.rows.map((r) => (
+                  <tr key={r.id} className="border-b last:border-b-0" style={{ borderColor: "var(--border)" }}>
+                    <td className="px-4 py-2.5 font-mono text-xs tracking-wide uppercase" style={{ color: "var(--muted)" }}>
+                      {r.stage}
+                    </td>
+                    <td className="px-4 py-2.5 font-mono text-xs">{r.model}</td>
+                    <td className="px-4 py-2.5 font-mono text-xs">{r.inputTokens}</td>
+                    <td className="px-4 py-2.5 font-mono text-xs">{r.outputTokens}</td>
+                    <td className="px-4 py-2.5 font-mono text-xs" style={{ color: "var(--accent-hover)" }}>
+                      ${Number(r.usd ?? 0).toFixed(5)}
+                    </td>
+                    <td className="px-4 py-2.5 text-xs" style={{ color: "var(--muted)" }}>
+                      {new Date(r.at).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </main>

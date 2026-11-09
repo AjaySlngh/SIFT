@@ -1,8 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0b;
+  --surface: #131316;
+  --surface-raised: #1a1a1e;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --foreground: #f2f2f3;
+  --muted: #9a9aa2;
+  --muted-foreground: #6b6b74;
+  --accent: #b32c23;
+  --accent-hover: #c73b32;
+  --accent-foreground: #fdf4f3;
+  --success: #3fb950;
+  --warning: #d29922;
+  --danger: #e5484d;
 }
 
 @theme inline {
@@ -12,15 +24,63 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background-color: var(--background);
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .card {
+    @apply rounded-lg border p-5;
+    background-color: var(--surface);
+    border-color: var(--border);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40;
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+  .btn-primary:not(:disabled):hover {
+    background-color: var(--accent-hover);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border bg-transparent px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40;
+    border-color: var(--border-strong);
+    color: var(--foreground);
+  }
+  .btn-secondary:not(:disabled):hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .label-eyebrow {
+    @apply font-mono text-xs tracking-widest uppercase;
+    color: var(--muted);
+  }
+
+  .input {
+    @apply rounded-md border bg-black/20 px-3 py-1.5 text-sm transition focus:outline-none;
+    border-color: var(--border-strong);
+    color: var(--foreground);
+  }
+  .input:focus {
+    border-color: var(--accent);
+  }
+  .input::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  .link-accent {
+    color: var(--accent-hover);
+  }
+  .link-accent:hover {
+    text-decoration: underline;
+  }
 }

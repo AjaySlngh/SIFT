@@ -36,5 +36,64 @@ services:
       timeout: 5s
       retries: 10
 
+  # One-off: applies Drizzle migrations, then exits. Everything else waits on
+  # this finishing successfully. This is the only service with a `build:`
+  # block — web/worker/seed reuse the resulting `sift-app:latest` image.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sift-app:latest
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://sift:sift@postgres:5432/sift
+    command: ["pnpm", "db:migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # One-off: seeds the demo users (reviewer, admin, agent), then exits.
+  seed:
+    image: sift-app:latest
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://sift:sift@postgres:5432/sift
+    command: ["pnpm", "seed"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    image: sift-app:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://sift:sift@postgres:5432/sift
+      S3_ENDPOINT: http://minio:9090
+    # Bypasses the package.json "start" script (which hardcodes
+    # --env-file=../../.env for local dev) since docker-compose already
+    # injects real env vars into the container's process environment.
+    command: ["pnpm", "--filter", "@sift/worker", "exec", "tsx", "src/index.ts"]
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+      minio:
+        condition: service_healthy
+
+  web:
+    image: sift-app:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://sift:sift@postgres:5432/sift
+      S3_ENDPOINT: http://minio:9090
+    ports:
+      - "3000:3000"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+      minio:
+        condition: service_healthy
+
 volumes:
   pg_data:

@@ -93,43 +93,42 @@ export default function ReviewTaskPage({ params }: { params: Promise<{ id: strin
 
   if (!task) {
     return (
-      <main className="flex-1 p-8">
-        <p className="text-sm text-gray-500">Loading…</p>
+      <main className="flex-1 px-8 py-12">
+        <p className="text-sm" style={{ color: "var(--muted)" }}>
+          Loading…
+        </p>
       </main>
     );
   }
 
   if (task.status !== "open") {
     return (
-      <main className="flex-1 p-8">
-        <h1 className="text-xl font-semibold">Task {task.id.slice(0, 8)}</h1>
-        <p className="mt-2 text-sm text-gray-500">Already {task.status}.</p>
+      <main className="flex-1 px-8 py-12">
+        <p className="label-eyebrow">Task · {task.id.slice(0, 8)}</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Already {task.status}</h1>
       </main>
     );
   }
 
   if (task.kind === "approve_letter") {
     return (
-      <main className="mx-auto w-full max-w-2xl flex-1 p-8">
-        <h1 className="text-xl font-semibold">Approve missing-documents letter</h1>
-        <p className="mt-1 text-sm text-gray-500">Case: {task.case?.borrowerName || task.caseId}</p>
-        <pre className="mt-4 whitespace-pre-wrap rounded border border-gray-200 bg-gray-50 p-4 text-sm">
-          {task.reason}
-        </pre>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-        <div className="mt-4 flex gap-3">
-          <button
-            disabled={busy}
-            onClick={() => resolve({ action: "approve" })}
-            className="rounded bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
-          >
+      <main className="mx-auto w-full max-w-2xl flex-1 px-8 py-12">
+        <p className="label-eyebrow">Approve letter</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Missing-documents letter</h1>
+        <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
+          Case: {task.case?.borrowerName || task.caseId}
+        </p>
+        <pre className="card mt-5 font-mono text-sm whitespace-pre-wrap">{task.reason}</pre>
+        {error && (
+          <p className="mt-3 text-sm" style={{ color: "var(--danger)" }}>
+            {error}
+          </p>
+        )}
+        <div className="mt-5 flex gap-3">
+          <button disabled={busy} onClick={() => resolve({ action: "approve" })} className="btn-primary">
             Approve
           </button>
-          <button
-            disabled={busy}
-            onClick={() => resolve({ action: "reject" })}
-            className="rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50"
-          >
+          <button disabled={busy} onClick={() => resolve({ action: "reject" })} className="btn-secondary">
             Reject
           </button>
         </div>
@@ -138,93 +137,93 @@ export default function ReviewTaskPage({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 gap-8 p-8">
-      <div className="flex-1">
-        <h1 className="text-xl font-semibold">
-          {task.document?.docType ?? "(unclassified)"}{" "}
-          <span className="text-sm font-normal text-gray-400">
-            pages {task.document?.pageStart}–{task.document?.pageEnd}
-          </span>
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">{task.reason}</p>
+    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-8 py-12">
+      <p className="label-eyebrow">
+        {task.kind ? task.kind.replace(/_/g, " ") : "review"} · pages {task.document?.pageStart}–
+        {task.document?.pageEnd}
+      </p>
+      <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+        {task.document?.docType ?? "(unclassified)"}
+      </h1>
+      <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
+        {task.reason}
+      </p>
 
-        <div className="mt-6 flex flex-col gap-3">
-          {task.fields.map((f) => {
-            const weak = (f.score !== null && Number(f.score) < 0.85) || (f.failedChecks?.length ?? 0) > 0;
-            return (
-              <div
-                key={f.id}
-                className={`rounded border p-3 text-sm ${weak ? "border-amber-400 bg-amber-50" : "border-gray-200"}`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{f.name}</span>
-                  <span className="text-xs text-gray-500">
-                    conf {f.modelConfidence ? Number(f.modelConfidence).toFixed(2) : "—"} · score{" "}
-                    {f.score ? Number(f.score).toFixed(2) : "—"}
-                  </span>
-                </div>
-                <input
-                  className="mt-2 w-full rounded border border-gray-300 px-2 py-1 text-sm"
-                  defaultValue={String(f.value ?? "")}
-                  onChange={(e) => setEdits((prev) => ({ ...prev, [f.id]: e.target.value }))}
-                />
-                {f.evidence && <p className="mt-1 text-xs text-gray-500">“{f.evidence}” (p.{f.sourcePage})</p>}
-                {f.failedChecks && f.failedChecks.length > 0 && (
-                  <p className="mt-1 text-xs text-amber-700">failed: {f.failedChecks.join(", ")}</p>
-                )}
+      <div className="mt-6 flex flex-col gap-3">
+        {task.fields.map((f) => {
+          const weak = (f.score !== null && Number(f.score) < 0.85) || (f.failedChecks?.length ?? 0) > 0;
+          return (
+            <div
+              key={f.id}
+              className="card py-3"
+              style={{ borderColor: weak ? "rgba(210,153,34,0.4)" : "var(--border)" }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-sm">{f.name}</span>
+                <span className="font-mono text-xs" style={{ color: "var(--muted)" }}>
+                  conf {f.modelConfidence ? Number(f.modelConfidence).toFixed(2) : "—"} · score{" "}
+                  {f.score ? Number(f.score).toFixed(2) : "—"}
+                </span>
               </div>
-            );
-          })}
-        </div>
+              <input
+                className="input mt-2 w-full"
+                defaultValue={String(f.value ?? "")}
+                onChange={(e) => setEdits((prev) => ({ ...prev, [f.id]: e.target.value }))}
+              />
+              {f.evidence && (
+                <p className="mt-2 text-xs" style={{ color: "var(--muted-foreground)" }}>
+                  “{f.evidence}” (p.{f.sourcePage})
+                </p>
+              )}
+              {f.failedChecks && f.failedChecks.length > 0 && (
+                <p className="mt-1 font-mono text-xs" style={{ color: "var(--warning)" }}>
+                  failed: {f.failedChecks.join(", ")}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
-        <div className="mt-4">
-          <label htmlFor="reason" className="text-xs text-gray-500">
-            Reason (required for edits/reject)
-          </label>
-          <input
-            id="reason"
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
-        </div>
+      <div className="mt-5 flex flex-col gap-1">
+        <label htmlFor="reason" className="label-eyebrow">
+          Reason (required for edits/reject)
+        </label>
+        <input
+          id="reason"
+          className="input"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
+      </div>
 
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="mt-3 text-sm" style={{ color: "var(--danger)" }}>
+          {error}
+        </p>
+      )}
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button
-            disabled={busy}
-            onClick={approve}
-            className="rounded bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
-          >
-            Approve
-          </button>
-          <button
-            disabled={busy}
-            onClick={reject}
-            className="rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50"
-          >
-            Reject document
-          </button>
-          <select
-            className="rounded border border-gray-300 px-2 py-1 text-sm"
-            value={newDocType}
-            onChange={(e) => setNewDocType(e.target.value)}
-          >
-            {DOC_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          <button
-            disabled={busy}
-            onClick={reclassify}
-            className="rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50"
-          >
-            Reclassify
-          </button>
-        </div>
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button disabled={busy} onClick={approve} className="btn-primary">
+          Approve
+        </button>
+        <button disabled={busy} onClick={reject} className="btn-secondary">
+          Reject document
+        </button>
+        <select
+          className="input font-mono text-xs"
+          value={newDocType}
+          onChange={(e) => setNewDocType(e.target.value)}
+        >
+          {DOC_TYPES.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+        <button disabled={busy} onClick={reclassify} className="btn-secondary">
+          Reclassify
+        </button>
       </div>
     </main>
   );

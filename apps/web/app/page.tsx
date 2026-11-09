@@ -12,11 +12,11 @@ interface SiftCase {
   createdAt: string;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  open: "bg-gray-100 text-gray-700",
-  in_review: "bg-amber-100 text-amber-800",
-  incomplete: "bg-orange-100 text-orange-800",
-  complete: "bg-green-100 text-green-800",
+const STATUS_STYLES: Record<string, string> = {
+  open: "border-zinc-500/30 bg-zinc-500/10 text-zinc-300",
+  in_review: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  incomplete: "border-orange-500/30 bg-orange-500/10 text-orange-400",
+  complete: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
 };
 
 export default function HomePage() {
@@ -63,87 +63,103 @@ export default function HomePage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 p-8">
+    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-10 px-8 py-12">
       <div>
-        <h1 className="text-2xl font-semibold">sift</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Borrower assistance packet intake: split, classify, extract, score, route.
+        <p className="label-eyebrow">Document intake &amp; decisioning</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance">
+          Helps you find the right documents, and make the right decisions.
+        </h1>
+        <p className="mt-2 max-w-xl text-sm" style={{ color: "var(--muted)" }}>
+          Split, classify, extract, and score borrower assistance packets — with every
+          auto-accept and human correction written to an auditable ledger.
         </p>
       </div>
 
-      <section>
-        <h2 className="text-lg font-medium">New case</h2>
+      <section className="card">
+        <p className="label-eyebrow">New case</p>
         <form onSubmit={createCase} className="mt-3 flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1">
-            <label htmlFor="borrowerName" className="text-xs text-gray-500">
+            <label htmlFor="borrowerName" className="label-eyebrow">
               Borrower name
             </label>
             <input
               id="borrowerName"
-              className="rounded border border-gray-300 px-2 py-1 text-sm"
+              className="input"
               value={borrowerName}
               onChange={(e) => setBorrowerName(e.target.value)}
               placeholder="Jane Doe"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="loanNumber" className="text-xs text-gray-500">
+            <label htmlFor="loanNumber" className="label-eyebrow">
               Loan number
             </label>
             <input
               id="loanNumber"
-              className="rounded border border-gray-300 px-2 py-1 text-sm"
+              className="input font-mono"
               value={loanNumber}
               onChange={(e) => setLoanNumber(e.target.value)}
               placeholder="L-0001"
             />
           </div>
-          <button
-            type="submit"
-            disabled={creating || !actorId}
-            className="rounded bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
-          >
+          <button type="submit" disabled={creating || !actorId} className="btn-primary">
             {creating ? "Creating…" : "Create case"}
           </button>
         </form>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-2 text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
       </section>
 
       <section>
-        <h2 className="text-lg font-medium">Cases</h2>
+        <p className="label-eyebrow">Cases</p>
         {loading ? (
-          <p className="mt-2 text-sm text-gray-500">Loading…</p>
+          <p className="mt-3 text-sm" style={{ color: "var(--muted)" }}>
+            Loading…
+          </p>
         ) : cases.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-500">No cases yet — create one above.</p>
+          <p className="mt-3 text-sm" style={{ color: "var(--muted)" }}>
+            No cases yet — create one above.
+          </p>
         ) : (
-          <table className="mt-3 w-full text-left text-sm">
-            <thead className="text-xs uppercase text-gray-500">
-              <tr>
-                <th className="pb-2">Borrower</th>
-                <th className="pb-2">Loan #</th>
-                <th className="pb-2">Status</th>
-                <th className="pb-2">Created</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cases.map((c) => (
-                <tr key={c.id} className="border-t border-gray-100">
-                  <td className="py-2">
-                    <Link href={`/cases/${c.id}`} className="underline">
-                      {c.borrowerName || "(unnamed)"}
-                    </Link>
-                  </td>
-                  <td className="py-2">{c.loanNumber || "—"}</td>
-                  <td className="py-2">
-                    <span className={`rounded px-2 py-0.5 text-xs ${STATUS_COLORS[c.status] ?? "bg-gray-100"}`}>
-                      {c.status}
-                    </span>
-                  </td>
-                  <td className="py-2 text-gray-500">{new Date(c.createdAt).toLocaleString()}</td>
+          <div className="mt-3 overflow-hidden rounded-lg border" style={{ borderColor: "var(--border)" }}>
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="label-eyebrow border-b" style={{ borderColor: "var(--border)" }}>
+                  <th className="px-4 py-2 font-normal">Borrower</th>
+                  <th className="px-4 py-2 font-normal">Loan #</th>
+                  <th className="px-4 py-2 font-normal">Status</th>
+                  <th className="px-4 py-2 font-normal">Created</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {cases.map((c) => (
+                  <tr
+                    key={c.id}
+                    className="border-b last:border-b-0"
+                    style={{ borderColor: "var(--border)" }}
+                  >
+                    <td className="px-4 py-2.5">
+                      <Link href={`/cases/${c.id}`} className="link-accent">
+                        {c.borrowerName || "(unnamed)"}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2.5 font-mono text-xs" style={{ color: "var(--muted)" }}>
+                      {c.loanNumber || "—"}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span
+                        className={`rounded border px-2 py-0.5 font-mono text-xs tracking-wide uppercase ${STATUS_STYLES[c.status] ?? "border-zinc-500/30 bg-zinc-500/10 text-zinc-300"}`}
+                      >
+                        {c.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-xs" style={{ color: "var(--muted)" }}>
+                      {new Date(c.createdAt).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </main>

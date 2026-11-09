@@ -55,11 +55,18 @@ interface AuditEvent {
   model: string | null;
 }
 
-const DOC_STATUS_COLORS: Record<string, string> = {
-  pending: "bg-gray-100 text-gray-700",
-  accepted: "bg-green-100 text-green-800",
-  needs_review: "bg-amber-100 text-amber-800",
-  rejected: "bg-red-100 text-red-800",
+const DOC_STATUS_STYLES: Record<string, string> = {
+  pending: "border-zinc-500/30 bg-zinc-500/10 text-zinc-300",
+  accepted: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+  needs_review: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  rejected: "border-red-500/30 bg-red-500/10 text-red-400",
+};
+
+const CASE_STATUS_STYLES: Record<string, string> = {
+  open: "border-zinc-500/30 bg-zinc-500/10 text-zinc-300",
+  in_review: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  incomplete: "border-orange-500/30 bg-orange-500/10 text-orange-400",
+  complete: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
 };
 
 export default function CasePage({ params }: { params: Promise<{ id: string }> }) {
@@ -120,55 +127,76 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
 
   if (!caseData) {
     return (
-      <main className="flex-1 p-8">
-        <p className="text-sm text-gray-500">Loading…</p>
+      <main className="flex-1 px-8 py-12">
+        <p className="text-sm" style={{ color: "var(--muted)" }}>
+          Loading…
+        </p>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 p-8">
-      <div className="flex items-center justify-between">
+    <main className="mx-auto w-full max-w-4xl flex-1 px-8 py-12">
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold">{caseData.borrowerName || "(unnamed)"}</h1>
-          <p className="text-sm text-gray-500">
-            Loan {caseData.loanNumber || "—"} · <span className="uppercase">{caseData.status}</span>
+          <p className="label-eyebrow">
+            Case · <span className="font-mono">{caseData.id.slice(0, 8)}</span>
           </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+            {caseData.borrowerName || "(unnamed)"}
+          </h1>
+          <div className="mt-2 flex items-center gap-3 text-sm" style={{ color: "var(--muted)" }}>
+            <span className="font-mono">{caseData.loanNumber || "—"}</span>
+            <span
+              className={`rounded border px-2 py-0.5 font-mono text-xs tracking-wide uppercase ${CASE_STATUS_STYLES[caseData.status] ?? "border-zinc-500/30 bg-zinc-500/10 text-zinc-300"}`}
+            >
+              {caseData.status}
+            </span>
+          </div>
         </div>
-        <Link href="/" className="text-sm underline">
+        <Link href="/" className="link-accent text-sm">
           ← All cases
         </Link>
       </div>
 
-      <section className="mt-6">
-        <h2 className="text-sm font-medium text-gray-700">Upload a packet</h2>
-        <form onSubmit={uploadPackage} className="mt-2 flex items-center gap-3">
+      <section className="card mt-8">
+        <p className="label-eyebrow">Upload a packet</p>
+        <form onSubmit={uploadPackage} className="mt-3 flex items-center gap-3">
           <input
             type="file"
             accept="application/pdf"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="text-sm"
+            className="font-mono text-xs"
+            style={{ color: "var(--muted)" }}
           />
-          <button
-            type="submit"
-            disabled={!file || uploading || !actorId}
-            className="rounded bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
-          >
+          <button type="submit" disabled={!file || uploading || !actorId} className="btn-primary">
             {uploading ? "Uploading…" : "Upload"}
           </button>
         </form>
-        {uploadError && <p className="mt-2 text-sm text-red-600">{uploadError}</p>}
+        {uploadError && (
+          <p className="mt-2 text-sm" style={{ color: "var(--danger)" }}>
+            {uploadError}
+          </p>
+        )}
       </section>
 
-      <div className="mt-8 flex gap-4 border-b border-gray-200 text-sm">
+      <div className="mt-8 flex gap-6 border-b" style={{ borderColor: "var(--border)" }}>
         <button
-          className={`-mb-px border-b-2 pb-2 ${tab === "documents" ? "border-black font-medium" : "border-transparent text-gray-500"}`}
+          className="-mb-px border-b-2 pb-2 font-mono text-xs tracking-widest uppercase transition"
+          style={{
+            borderColor: tab === "documents" ? "var(--accent)" : "transparent",
+            color: tab === "documents" ? "var(--foreground)" : "var(--muted)",
+          }}
           onClick={() => setTab("documents")}
         >
           Documents
         </button>
         <button
-          className={`-mb-px border-b-2 pb-2 ${tab === "audit" ? "border-black font-medium" : "border-transparent text-gray-500"}`}
+          className="-mb-px border-b-2 pb-2 font-mono text-xs tracking-widest uppercase transition"
+          style={{
+            borderColor: tab === "audit" ? "var(--accent)" : "transparent",
+            color: tab === "audit" ? "var(--foreground)" : "var(--muted)",
+          }}
           onClick={() => setTab("audit")}
         >
           Audit trail
@@ -176,18 +204,22 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
       </div>
 
       {tab === "documents" ? (
-        <div className="mt-6 flex flex-col gap-6">
+        <div className="mt-6 flex flex-col gap-8">
           {caseData.packages.length === 0 && (
-            <p className="text-sm text-gray-500">No packets uploaded yet.</p>
+            <p className="text-sm" style={{ color: "var(--muted)" }}>
+              No packets uploaded yet.
+            </p>
           )}
           {caseData.packages.map((pkg) => (
             <div key={pkg.id}>
-              <p className="text-xs text-gray-500">
+              <p className="label-eyebrow">
                 Packet {pkg.sha256.slice(0, 12)}… · {pkg.pageCount ?? "?"} pages
               </p>
-              <div className="mt-2 flex flex-col divide-y divide-gray-100 rounded border border-gray-200">
+              <div className="mt-3 flex flex-col gap-2">
                 {pkg.documents.length === 0 && (
-                  <p className="p-3 text-sm text-gray-500">Splitting…</p>
+                  <p className="card text-sm" style={{ color: "var(--muted)" }}>
+                    Splitting…
+                  </p>
                 )}
                 {pkg.documents.map((doc) => (
                   <DocumentRow key={doc.id} doc={doc} />
@@ -199,16 +231,22 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
       ) : (
         <div className="mt-6 flex flex-col gap-2">
           {auditEvents.length === 0 ? (
-            <p className="text-sm text-gray-500">No audit events yet.</p>
+            <p className="text-sm" style={{ color: "var(--muted)" }}>
+              No audit events yet.
+            </p>
           ) : (
             auditEvents.map((ev) => (
-              <div key={ev.id} className="rounded border border-gray-100 p-3 text-sm">
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>{ev.action}</span>
+              <div key={ev.id} className="card py-3">
+                <div className="flex justify-between font-mono text-xs" style={{ color: "var(--muted)" }}>
+                  <span className="tracking-wide uppercase">{ev.action}</span>
                   <span>{new Date(ev.at).toLocaleString()}</span>
                 </div>
-                <p className="mt-1 text-gray-700">{ev.entity}</p>
-                {ev.model && <p className="mt-1 text-xs text-gray-400">model: {ev.model}</p>}
+                <p className="mt-1 font-mono text-sm">{ev.entity}</p>
+                {ev.model && (
+                  <p className="mt-1 font-mono text-xs" style={{ color: "var(--muted-foreground)" }}>
+                    model: {ev.model}
+                  </p>
+                )}
               </div>
             ))
           )}
@@ -218,43 +256,61 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   );
 }
 
+const STATUS_BORDER: Record<string, string> = {
+  pending: "rgba(255,255,255,0.09)",
+  accepted: "rgba(63,185,80,0.35)",
+  needs_review: "rgba(210,153,34,0.4)",
+  rejected: "rgba(229,72,77,0.4)",
+};
+
 function DocumentRow({ doc }: { doc: Document }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="p-3">
-      <button className="flex w-full items-center justify-between text-left text-sm" onClick={() => setOpen((v) => !v)}>
-        <span>
-          {doc.docType ?? "(unclassified)"}{" "}
-          <span className="text-gray-400">
+    <div
+      className="card py-3"
+      style={{ borderColor: STATUS_BORDER[doc.status] ?? "var(--border)" }}
+    >
+      <button className="flex w-full items-center justify-between text-left" onClick={() => setOpen((v) => !v)}>
+        <span className="flex items-baseline gap-2">
+          <span className="font-mono text-sm">{doc.docType ?? "(unclassified)"}</span>
+          <span className="font-mono text-xs" style={{ color: "var(--muted-foreground)" }}>
             pages {doc.pageStart}–{doc.pageEnd}
           </span>
         </span>
-        <span className="flex items-center gap-2">
-          {doc.score && <span className="text-xs text-gray-500">score {Number(doc.score).toFixed(2)}</span>}
-          <span className={`rounded px-2 py-0.5 text-xs ${DOC_STATUS_COLORS[doc.status] ?? "bg-gray-100"}`}>
+        <span className="flex items-center gap-3">
+          {doc.score && (
+            <span className="font-mono text-xs" style={{ color: "var(--muted)" }}>
+              score {Number(doc.score).toFixed(2)}
+            </span>
+          )}
+          <span
+            className={`rounded border px-2 py-0.5 font-mono text-xs tracking-wide uppercase ${DOC_STATUS_STYLES[doc.status] ?? "border-zinc-500/30 bg-zinc-500/10 text-zinc-300"}`}
+          >
             {doc.status}
           </span>
         </span>
       </button>
       {open && (
-        <table className="mt-3 w-full text-left text-xs">
-          <thead className="text-gray-500">
-            <tr>
-              <th className="pb-1">Field</th>
-              <th className="pb-1">Value</th>
-              <th className="pb-1">Confidence</th>
-              <th className="pb-1">Score</th>
-              <th className="pb-1">Failed checks</th>
+        <table className="mt-4 w-full text-left text-xs">
+          <thead>
+            <tr className="label-eyebrow">
+              <th className="pb-2 font-normal">Field</th>
+              <th className="pb-2 font-normal">Value</th>
+              <th className="pb-2 font-normal">Confidence</th>
+              <th className="pb-2 font-normal">Score</th>
+              <th className="pb-2 font-normal">Failed checks</th>
             </tr>
           </thead>
           <tbody>
             {doc.fields.map((f) => (
-              <tr key={f.id} className="border-t border-gray-100">
-                <td className="py-1">{f.name}</td>
-                <td className="py-1">{String(f.value)}</td>
-                <td className="py-1">{f.modelConfidence ? Number(f.modelConfidence).toFixed(2) : "—"}</td>
-                <td className="py-1">{f.score ? Number(f.score).toFixed(2) : "—"}</td>
-                <td className="py-1 text-amber-700">{f.failedChecks?.join(", ") || "—"}</td>
+              <tr key={f.id} className="border-t" style={{ borderColor: "var(--border)" }}>
+                <td className="py-2 font-mono">{f.name}</td>
+                <td className="py-2">{String(f.value)}</td>
+                <td className="py-2 font-mono">{f.modelConfidence ? Number(f.modelConfidence).toFixed(2) : "—"}</td>
+                <td className="py-2 font-mono">{f.score ? Number(f.score).toFixed(2) : "—"}</td>
+                <td className="py-2 font-mono" style={{ color: "var(--warning)" }}>
+                  {f.failedChecks?.join(", ") || "—"}
+                </td>
               </tr>
             ))}
           </tbody>
