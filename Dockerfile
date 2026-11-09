@@ -9,7 +9,9 @@ FROM node:20-alpine
 # no extra build toolchain is required.
 RUN apk add --no-cache libc6-compat
 
-RUN corepack enable
+ENV COREPACK_HOME=/opt/corepack
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
 WORKDIR /app
 
 # Install deps first so this layer is cached unless lockfile/package.json
@@ -26,9 +28,11 @@ RUN pnpm install --frozen-lockfile
 # the worker/migrate/seed processes run them straight through tsx — no build
 # step needed for those.
 COPY . .
-RUN pnpm --filter @sift/web build
+RUN pnpm --filter @sift/web build \
+ && chgrp -R 0 /app /opt/corepack \
+ && chmod -R g=u /app /opt/corepack
 
-ENV NODE_ENV=production
+ENV NODE_ENV=production HOME=/tmp
 EXPOSE 3000
 
 CMD ["pnpm", "--filter", "@sift/web", "start"]
